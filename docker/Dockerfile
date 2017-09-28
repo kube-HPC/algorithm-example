@@ -9,10 +9,11 @@ RUN apt-get update \
   && pip3 install --upgrade pip
 
 # Set the working directory to /app
-WORKDIR /app
+WORKDIR /wrapper
 
 # Copy the current directory contents into the container at /app
-ADD . /app
+ADD ../libStub/cmake-build-debug/liblibStub.so /libStub/cmake-build-debug
+ADD ../wrapper/wrapper.py /wrapper
 
 # Install any needed packages specified in requirements.txt
 RUN pip install -r requirements.txt
