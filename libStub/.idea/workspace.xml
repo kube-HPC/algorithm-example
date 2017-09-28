@@ -11,9 +11,7 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7883c5aa-4622-4e17-bc76-2b27ea38ce9f" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../wrapper/.idea/workspace.xml" afterPath="$PROJECT_DIR$/../wrapper/.idea/workspace.xml" />
-    </list>
+    <list default="true" id="7883c5aa-4622-4e17-bc76-2b27ea38ce9f" name="Default" comment="" />
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -369,12 +367,12 @@
       <option name="presentableId" value="Default" />
       <updated>1506584037357</updated>
       <workItem from="1506584038718" duration="14663000" />
-      <workItem from="1506611009221" duration="687000" />
+      <workItem from="1506611009221" duration="1284000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="15350000" />
+    <option name="totallyTimeSpent" value="15947000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">

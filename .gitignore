@@ -1,2 +1,4 @@
 libstub/cmake-build*
 libStub/cmake-build-debug/*
+wrapper/output.txt
+wrapper/progress.txt
