@@ -1,0 +1,3 @@
+this project contains the algorithm part of the project. it actually the one part that is not included in the project (we do not make the algorithm packages, now, do we?) but is essential for it to run.
+
+the docker contains the python script to run the algorithm, a shared library in c++ that executes the algorithm and a generic algorithm runner to launch the python script. we are using ubuntu16 and python3 for the docker image.

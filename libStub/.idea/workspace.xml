@@ -11,7 +11,9 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7883c5aa-4622-4e17-bc76-2b27ea38ce9f" name="Default" comment="" />
+    <list default="true" id="7883c5aa-4622-4e17-bc76-2b27ea38ce9f" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../wrapper/.idea/workspace.xml" afterPath="$PROJECT_DIR$/../wrapper/.idea/workspace.xml" />
+    </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
