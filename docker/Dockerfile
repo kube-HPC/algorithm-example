@@ -12,11 +12,11 @@ RUN apt-get update \
 WORKDIR /wrapper
 
 # Copy the current directory contents into the container at /app
-ADD ../libStub/cmake-build-debug/liblibStub.so /libStub/cmake-build-debug
-ADD ../wrapper/wrapper.py /wrapper
+ADD liblibStub.so /libStub/cmake-build-debug
+ADD wrapper.py /wrapper
 
 # Install any needed packages specified in requirements.txt
-RUN pip install -r requirements.txt
+# RUN pip install -r requirements.txt
 
 # Run app.py when the container launches
 CMD ["", "app.py"]
