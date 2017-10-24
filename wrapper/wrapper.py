@@ -3,6 +3,10 @@ from ctypes import *
 from time import sleep
 import json
 
+
+
+
+
 # read input
 with open('./input.json', 'r') as data_file:
     data = json.load(data_file)

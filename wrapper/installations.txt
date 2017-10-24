@@ -1,0 +1,19 @@
+sudo apt-get install python3
+sudo apt-get install python3-pip
+
+for server:
+sudo pip install --upgrade pip
+pip3 install aiohttp
+pip3 install pip3 install python-socketio
+
+
+for client
+from socketIO_client import SocketIO, LoggingNamespace
+
+with SocketIO('localhost', 8000, LoggingNamespace) as socketIO:
+    socketIO.emit('aaa')
+    socketIO.wait(seconds=1)
+
+
+
+
