@@ -4,3 +4,4 @@ wrapper/output.txt
 wrapper/progress.txt
 libStub/build
 .idea
+wrapper/testServer/node_modules/*
