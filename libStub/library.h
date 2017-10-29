@@ -3,4 +3,5 @@
 
 extern "C" int doAlgo(int seconds);
 extern "C" double progress();
+extern "C" bool stop();
 #endif

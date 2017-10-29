@@ -4,7 +4,8 @@ const path = require('path');
 const bodyParser = require('body-parser');
 
 var server = require('http').createServer(app);  
-var sio = require('socket.io')(server,{transports: ['websocket']});
+var sio = require('socket.io')(server);
+
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -30,12 +31,15 @@ function getTime() {
 }
 
 app.post('*', function(req, res) {
+    console.log('got user request:');
     console.log(req.body);
-    if (undefined != req.body.init){
+    if (undefined != req.body.initialize){
         sio.emit("commandMessage",{command:"initialize",data:{}})
         res.send(getTime() + " - sending initialize!");
     }
     else if (undefined != req.body.start){
+        done = false;
+        getprogress = "0%";
         sio.emit("commandMessage",{command:"start",data:{}})
         res.send(getTime() + " - sending start!");
     }
@@ -44,7 +48,8 @@ app.post('*', function(req, res) {
         res.send(getTime() + " - sending stop!");
     }
     else if (undefined != req.body.getprogress){
-        res.send(getTime() + " - progress is : "+ getprogress);
+        if (done == true) res.send(getTime() + " - done. result is : "+ getprogress);
+        else res.send(getTime() + " - progress is : "+ getprogress);
     }
     else if (undefined != req.body.refreshprogress){
         sio.emit("commandMessage",{command:"progress",data:{}})
@@ -54,25 +59,37 @@ app.post('*', function(req, res) {
 
 
 sio.on('connection', function(client) {  
-    console.log('Client connected...');
+    console.log('Client ' + client.id + ' has connected...');
 
     client.on('disconnect', function(data) {
-        console.log('Client disconnected...');
+        console.log('Client ' + client.id + ' disconnected...');
     });
     client.on('reconnect', function(data) {
-        console.log('Client disconnected...');
+        console.log('Client ' + client.id + ' reconnected...');
     });
 
      client.on('commandMessage', function(data) {
-         if (data!=undefined){
-    //         progress = data[].progress;
-         console.log(data);
+        if (data!=undefined){
+            console.log('commandMessage:') ;
+            console.log(data);
+            if (data.command!=undefined){ //it's a command
+                if(data.command==="done"){
+                    getprogress = JSON.stringify(data.data);
+                    done = true;
+                } else if(data.command==="progress"){
+                    getprogress = data.data.progress + '%';
+                }
+            }
+
+         
+        
         }
+
      });
 });
 
 
-app.listen(3000);
+server.listen(3000);
 
 
 
