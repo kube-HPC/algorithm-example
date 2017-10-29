@@ -6,6 +6,10 @@ const bodyParser = require('body-parser');
 var server = require('http').createServer(app);  
 var sio = require('socket.io')(server);
 
+//serving static files:
+app.use(express.static(path.join(__dirname, 'node_modules')));
+//app.use(express.static('node_modules'));
+app.use(express.static(path.join(__dirname,'client')));
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -68,7 +72,7 @@ sio.on('connection', function(client) {
         console.log('Client ' + client.id + ' reconnected...');
     });
 
-     client.on('commandMessage', function(data) {
+    client.on('commandMessage', function(data) {
         if (data!=undefined){
             console.log('commandMessage:') ;
             console.log(data);
@@ -76,9 +80,12 @@ sio.on('connection', function(client) {
                 if(data.command==="done"){
                     getprogress = JSON.stringify(data.data);
                     done = true;
+                    sio.emit("updateProgress",getprogress);
                 } else if(data.command==="progress"){
                     getprogress = data.data.progress + '%';
+                    sio.emit("updateProgress",getprogress);
                 }
+                
             }
 
          
