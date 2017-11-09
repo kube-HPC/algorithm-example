@@ -1,5 +1,8 @@
 {
-  "name": "algoPackage",
+  "name": "algo-package",
   "version": "1.0.0",
-  "dependencies": {}
+  "dependencies": {},
+  "scripts": {
+    "build": "./dockerfile/build.sh algo-package"
+  }
 }

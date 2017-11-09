@@ -20,7 +20,13 @@ def get_progress(future, progressFunc):
 
 def run_algo():
     # connect to c++ library
-    algodll = cdll.LoadLibrary('../libStub/cmake-build-debug/liblibStub.so')
+    basePath = os.path.dirname(os.path.realpath(__file__));
+    dllPath = os.getenv('DLL_PATH', '../libStub/cmake-build-debug/liblibStub.so')
+    print('dllPath: ', dllPath)
+    if not os.path.isabs(dllPath):
+        dllPath = os.path.join(basePath,dllPath)
+    print('dllPath: ',dllPath)
+    algodll = cdll.LoadLibrary(dllPath)
     progress = algodll.progress
     progress.restype = c_double
     doAlgo = algodll.doAlgo
@@ -32,7 +38,8 @@ def run_algo():
 
 def stop_algo():
     # connect to c++ library
-    algodll = cdll.LoadLibrary('../libStub/cmake-build-debug/liblibStub.so')
+    dllPath = os.getenv('DLL_PATH', '../libStub/cmake-build-debug/liblibStub.so')
+    algodll = cdll.LoadLibrary(dllPath)
     stop = algodll.stop
     stop.restype = c_bool
     stop()
@@ -67,6 +74,7 @@ def on_command(*args):
         outMessage = {'command': 'stopped'}
         socketIO.emit('commandMessage', outMessage)
 
+
 socketPort = os.getenv('WORKER_SOCKET_PORT', 3000)
 socketIO = SocketIO('127.0.0.1', socketPort)
 
@@ -76,7 +84,6 @@ socketIO.on('reconnect', on_reconnect)
 
 # Listen
 socketIO.on('commandMessage', on_command)
-
 socketIO.wait()
 
 # ctypes defines a number of primitive C compatible data types:
