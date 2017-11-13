@@ -33,7 +33,7 @@ def run_algo():
     doAlgo.restype = c_int
     # start the algorithm async
     pool = ThreadPoolExecutor(2)
-    future = pool.submit(doAlgo, 6)
+    future = pool.submit(doAlgo, 10)
     progress_future = pool.submit(get_progress, future, progress)
 
 def stop_algo():
