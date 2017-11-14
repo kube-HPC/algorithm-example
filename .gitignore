@@ -2,6 +2,7 @@ libstub/cmake-build*
 libStub/cmake-build-debug/*
 wrapper/output.txt
 wrapper/progress.txt
-libStub/build
+libStub/build/*
+!libStub/build/liblibStub.so
 .idea
 wrapper/testServer/node_modules/*
