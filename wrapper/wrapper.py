@@ -3,7 +3,7 @@ from ctypes import *
 from time import sleep
 import json
 import os
-from socketIO_client import SocketIO, LoggingNamespace
+from socketIO_client import SocketIO
 
 
 def get_progress(future, progressFunc):
