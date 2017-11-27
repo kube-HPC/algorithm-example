@@ -35,6 +35,8 @@ deploy:
   script: PRIVATE_REGISTRY=docker.io/hkube npm run build
   on:
     branch: master
+after_deploy:
+  - curl -X POST -H 'accept:application/json'  -H "authorization:token ${TRAVIS_API_TOKEN}" -H 'content-type:application/json' -H 'travis-api-version:3' -d "{\"request\":{\"branch\":\"master\",\"message\":\"triggered by ${TRAVIS_REPO_SLUG}\"}}" "https://api.travis-ci.org/repo/kube-HPC%2Frelease-manager/requests"
 env:
   global:
   - secure: C4BBuIWK0r6jkAsDdTplOmsoBKBVEPd5NHyyPDpNYLTcJsHRtuWVZaMBkV86QY7w43Nyu1e6czjuU2CAoJ8/IlygIfO4Ty/g3nKyw8twKMypnoaBK8tq5CIKVQLZAa9bK9EMxZfLDEQ4fL10zw14KpHTDZ9OMQxnuTW+0qGA2Mr3/D8vvx0GO19ff5kH7HcMaea/qDSqSeX267Itt+2D0ls8TaodqIlwlShOzMVC4ZNoaNk7HcDaQHipjJ7Er+0u9ydJ3aUTGALbHdJAp6DSjzfK4yZWqIa/mo/DxPACJE1nkMTmwy8wH4Rxm6LaEFhmnGLbPeIxF4a7s1+UbNCS0xup7zwKmSj08JseznAr+R9rTWRFI9SO25LqFWfVHbSHcBzMpZybgGzEzZZNKgfPaiQp/F18OF9mPQ9G0jl19Xpn3saluy82J/yYj9GtPHHNCXYPCjzpSC5vuYIoCBuE4WtG4maol0KV0z5OizDOZIgXGyuBU9M6Y4pv/3/SKfVI444EbynEYTFX5jm8RL2JNf9tfYA4jusNh9T438mPxaCZy+FiFoRJE12vFSXYG2wpUXoYaGsxXeGI2BtxY40zy1Aptxg8YUYUBAOa/fJhhD16FiVZ95yIr03dXg1KdAGX3M+7h9S3SSAHdNPfZQGSAsT9RkfQzaZ5Mq8l3j27mqw=
