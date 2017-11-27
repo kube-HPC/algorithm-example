@@ -1,9 +1,9 @@
 {
-  "name": "algo-package",
+  "name": "algorithm-example",
   "version": "1.0.7",
   "dependencies": {},
   "scripts": {
-    "build": "./dockerfile/build.sh algo-package",
+    "build": "./dockerfile/build.sh algorithm-example",
     "test": "echo No test defined"
   }
 }
