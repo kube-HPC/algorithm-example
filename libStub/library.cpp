@@ -21,13 +21,9 @@ int doAlgo( int seconds)
             progressPercent = 100;
             return -1;
         }
-        //std::cout << "dd- " << i <<" of " << seconds << ".    progress: "<< progressPercent << "   q=" << quanta <<std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds(350));
         progressPercent += quanta;
-        std::cout << "iterate";
     }
-
-    printf("wait has ended! :)");
 
     progressPercent = 100;
     return  42;//2*seconds;
@@ -40,5 +36,6 @@ double progress()
 
 bool stop(){
     shouldStopFlag = true;
+    progressPercent=0;
     return shouldStopFlag;
 }

@@ -8,26 +8,27 @@ from socketIO_client import SocketIO
 
 def get_progress(future, progressFunc):
     while future.running():
-        print('before progress')
         progress = progressFunc()
         print(progress)
         outMessage = {'command': 'progress', 'data': {'progress': progress}}
         print('sending message: ',outMessage)
-        socketIO.emit('commandMessage', outMessage)
-        print('after message')
+        socketIO.emit('progress', outMessage)
         sleep(1)
-        print('after sleep')
 
-    print('algo done')
-    res = 'execution halt requested' if (future.result() == -1) else future.result()
-    out_message = {'command': 'done', 'data': {'output': res}}
-    socketIO.emit('commandMessage', out_message)
+    if future.result() == -1:
+        res = 'execution halt requested'
+        outMessage = {'command': 'stopped', 'data': {'output': res}}
+        socketIO.emit('stopped', outMessage)
+    else:
+        res = future.result()
+        out_message = {'command': 'done', 'data': {'output': res}}
+        socketIO.emit('done', out_message)
 
 
 def run_algo():
     # connect to c++ library
     basePath = os.path.dirname(os.path.realpath(__file__));
-    dllPath = os.getenv('DLL_PATH', '../libStub/cmake-build-debug/liblibStub.so')
+    dllPath = os.getenv('DLL_PATH', '../libStub/build/liblibStub.so')
     print('dllPath: ', dllPath)
     if not os.path.isabs(dllPath):
         dllPath = os.path.join(basePath,dllPath)
@@ -43,8 +44,14 @@ def run_algo():
     progress_future = pool.submit(get_progress, future, progress)
 
 def stop_algo():
+    print('got stop command')
     # connect to c++ library
-    dllPath = os.getenv('DLL_PATH', '../libStub/cmake-build-debug/liblibStub.so')
+    basePath = os.path.dirname(os.path.realpath(__file__));
+    dllPath = os.getenv('DLL_PATH', '../libStub/build/liblibStub.so')
+    print('dllPath: ', dllPath)
+    if not os.path.isabs(dllPath):
+        dllPath = os.path.join(basePath, dllPath)
+    print('dllPath: ', dllPath)
     algodll = cdll.LoadLibrary(dllPath)
     stop = algodll.stop
     stop.restype = c_bool
@@ -62,24 +69,36 @@ def on_reconnect():
     print('reconnect')
 
 
-def on_command(*args):
-    message = args[0]
-    command = message["command"]
-    data = message["data"]
-    print('command: ', command)
-    print('data: ', data)
-    if command == 'initialize':
-        outMessage = {'command': 'initialized'}
-        socketIO.emit('commandMessage', outMessage)
-    elif command == 'start':
-        run_algo()
-        outMessage = {'command': 'started'}
-        socketIO.emit('commandMessage', outMessage)
-    elif command == 'stop':
-        stop_algo()
-        outMessage = {'command': 'stopped'}
-        socketIO.emit('commandMessage', outMessage)
+# def on_command(*args):
+#     message = args[0]
+#     command = message["command"]
+#     data = message["data"]
+#     print('command: ', command)
+#     print('data: ', data)
+#     if command == 'initialize':
+#         outMessage = {'command': 'initialized'}
+#         socketIO.emit('commandMessage', outMessage)
+#     elif command == 'start':
+#         run_algo()
+#         outMessage = {'command': 'started'}
+#         socketIO.emit('commandMessage', outMessage)
+#     elif command == 'stop':
+#         stop_algo()
+#         outMessage = {'command': 'stopped'}
+#         socketIO.emit('commandMessage', outMessage)
 
+def on_init(*args):
+    message = args[0]
+    outMessage = {'command': 'initialized'}
+    socketIO.emit('initialized', outMessage)
+
+def on_start(*args):
+    run_algo()
+    outMessage = {'command': 'started'}
+    socketIO.emit('started', outMessage)
+
+def on_stop(*args):
+    stop_algo()
 
 socketPort = os.getenv('WORKER_SOCKET_PORT', 3000)
 socketIO = SocketIO('127.0.0.1', socketPort)
@@ -89,7 +108,10 @@ socketIO.on('disconnect', on_disconnect)
 socketIO.on('reconnect', on_reconnect)
 
 # Listen
-socketIO.on('commandMessage', on_command)
+# socketIO.on('commandMessage', on_command)
+socketIO.on('initialize', on_init)
+socketIO.on('start', on_start)
+socketIO.on('stop', on_stop)
 socketIO.wait()
 
 # ctypes defines a number of primitive C compatible data types:
