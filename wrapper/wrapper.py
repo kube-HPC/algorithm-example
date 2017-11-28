@@ -8,11 +8,17 @@ from socketIO_client import SocketIO
 
 def get_progress(future, progressFunc):
     while future.running():
+        print('before progress')
         progress = progressFunc()
         print(progress)
         outMessage = {'command': 'progress', 'data': {'progress': progress}}
+        print('sending message: ',outMessage)
         socketIO.emit('commandMessage', outMessage)
+        print('after message')
         sleep(1)
+        print('after sleep')
+
+    print('algo done')
     res = 'execution halt requested' if (future.result() == -1) else future.result()
     out_message = {'command': 'done', 'data': {'output': res}}
     socketIO.emit('commandMessage', out_message)

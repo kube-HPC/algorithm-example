@@ -22,8 +22,9 @@ int doAlgo( int seconds)
             return -1;
         }
         //std::cout << "dd- " << i <<" of " << seconds << ".    progress: "<< progressPercent << "   q=" << quanta <<std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::this_thread::sleep_for(std::chrono::milliseconds(350));
         progressPercent += quanta;
+        std::cout << "iterate";
     }
 
     printf("wait has ended! :)");
