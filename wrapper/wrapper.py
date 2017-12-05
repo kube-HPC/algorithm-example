@@ -1,61 +1,59 @@
 from concurrent.futures import ThreadPoolExecutor
 from ctypes import *
 from time import sleep
+from sys import path
 import json
 import os
 from socketIO_client import SocketIO
-
-
-def get_progress(future, progressFunc):
-    while future.running():
-        progress = progressFunc()
+import ApakMain
+from algoWrapper import AlgoWrapper
+ApakMATLAB = ApakMain.initialize()
+algoData = None
+isMainInProgress = False
+algoWrapperInstance = AlgoWrapper()
+def get_progress(isMainInProgress):
+    while isMainInProgress:
+        progress = algoWrapperInstance.progress()
         print(progress)
-        outMessage = {'command': 'progress', 'data': {'progress': progress}}
-        print('sending message: ',outMessage)
-        socketIO.emit('progress', outMessage)
+        # outMessage = {'command': 'progress', 'data': {'progress': progress}}
+        socketIO.emit('progress', {'data': {'progress': progress}})
         sleep(1)
 
-    if future.result() == -1:
-        res = 'execution halt requested'
-        outMessage = {'command': 'stopped', 'data': {'output': res}}
-        socketIO.emit('stopped', outMessage)
-    else:
-        res = future.result()
-        out_message = {'command': 'done', 'data': {'output': res}}
-        socketIO.emit('done', out_message)
 
+def resultCallback(future):
+    res = 'execution halt requested' if (future.result() == -1) else future.result()
+    # out_message = {'command': 'done', 'data': {'output': res}}
+    socketIO.emit('done', {'data': {'output': res}})
+    isMainInProgress = False
 
 def run_algo():
     # connect to c++ library
-    basePath = os.path.dirname(os.path.realpath(__file__));
-    dllPath = os.getenv('DLL_PATH', '../libStub/build/liblibStub.so')
-    print('dllPath: ', dllPath)
-    if not os.path.isabs(dllPath):
-        dllPath = os.path.join(basePath,dllPath)
-    print('dllPath: ',dllPath)
-    algodll = cdll.LoadLibrary(dllPath)
-    progress = algodll.progress
-    progress.restype = c_double
-    doAlgo = algodll.doAlgo
-    doAlgo.restype = c_int
+    # basePath = os.path.dirname(os.path.realpath(__file__));
+    # dllPath = os.getenv('DLL_PATH', '../libStub/cmake-build-debug/liblibStub.so')
+    # print('dllPath: ', dllPath)
+    # # if not os.path.isabs(dllPath):
+    # dllPath = os.path.join(basePath,dllPath)
+    # print('dllPath: ',dllPath)
+    # progress = algodll.progress
+    # # algodll = cdll.LoadLibrary(dllPath)
+    # progress.restype = c_double
+    # doAlgo = algodll.doAlgo
+    # doAlgo.restype = c_int
     # start the algorithm async
     pool = ThreadPoolExecutor(2)
-    future = pool.submit(doAlgo, 10)
-    progress_future = pool.submit(get_progress, future, progress)
+    isMainInProgress = True
+    future = pool.submit(algoWrapperInstance.run)
+    future.add_done_callback(resultCallback)
+    progress_future = pool.submit(get_progress,isMainInProgress)
 
 def stop_algo():
-    print('got stop command')
     # connect to c++ library
-    basePath = os.path.dirname(os.path.realpath(__file__));
-    dllPath = os.getenv('DLL_PATH', '../libStub/build/liblibStub.so')
-    print('dllPath: ', dllPath)
-    if not os.path.isabs(dllPath):
-        dllPath = os.path.join(basePath, dllPath)
-    print('dllPath: ', dllPath)
-    algodll = cdll.LoadLibrary(dllPath)
-    stop = algodll.stop
-    stop.restype = c_bool
-    stop()
+    # dllPath = os.getenv('DLL_PATH', '../libStub/cmake-build-debug/liblibStub.so')
+    # algodll = cdll.LoadLibrary(dllPath)
+    # # stop = algodll.stop
+    # # stop.restype = c_bool
+    # stop()
+    algoWrapperInstance.stop()
 
 def on_connect():
     print('connect')
@@ -69,6 +67,18 @@ def on_reconnect():
     print('reconnect')
 
 
+def initialize(data):
+    algoWrapperInstance.initialize(data)
+    socketIO.emit('initialized')
+def start():
+    run_algo()
+    socketIO.emit('started')
+
+def stop():
+    algoWrapperInstance.stop()
+    socketIO.emit('stopped')
+
+
 # def on_command(*args):
 #     message = args[0]
 #     command = message["command"]
@@ -76,8 +86,9 @@ def on_reconnect():
 #     print('command: ', command)
 #     print('data: ', data)
 #     if command == 'initialize':
-#         outMessage = {'command': 'initialized'}
-#         socketIO.emit('commandMessage', outMessage)
+#         # outMessage = {'command': 'initialized'}
+#         # algoWrapperInstance.initialize(data)
+#         # socketIO.emit('commandMessage', outMessage)
 #     elif command == 'start':
 #         run_algo()
 #         outMessage = {'command': 'started'}
@@ -87,31 +98,21 @@ def on_reconnect():
 #         outMessage = {'command': 'stopped'}
 #         socketIO.emit('commandMessage', outMessage)
 
-def on_init(*args):
-    message = args[0]
-    outMessage = {'command': 'initialized'}
-    socketIO.emit('initialized', outMessage)
 
-def on_start(*args):
-    run_algo()
-    outMessage = {'command': 'started'}
-    socketIO.emit('started', outMessage)
-
-def on_stop(*args):
-    stop_algo()
-
-socketPort = os.getenv('WORKER_SOCKET_PORT', 3000)
+socketPort = os.getenv('WORKER_SOCKET_PORT', 5000)
 socketIO = SocketIO('127.0.0.1', socketPort)
-
+print('passed line')
 socketIO.on('connect', on_connect)
 socketIO.on('disconnect', on_disconnect)
 socketIO.on('reconnect', on_reconnect)
 
 # Listen
-# socketIO.on('commandMessage', on_command)
-socketIO.on('initialize', on_init)
-socketIO.on('start', on_start)
-socketIO.on('stop', on_stop)
+#socketIO.on('initialize', lambda data: initialize(data))
+socketIO.on('initialize', initialize)
+socketIO.on('start', start)
+socketIO.on('stop', stop)
+
+
 socketIO.wait()
 
 # ctypes defines a number of primitive C compatible data types:
