@@ -4,6 +4,7 @@ from time import sleep
 import json
 import os
 from socketIO_client import SocketIO
+from random import *
 
 
 def get_progress(future, progressFunc):
@@ -40,7 +41,7 @@ def run_algo():
     doAlgo.restype = c_int
     # start the algorithm async
     pool = ThreadPoolExecutor(2)
-    future = pool.submit(doAlgo, 10)
+    future = pool.submit(doAlgo, randint(2, 10))
     progress_future = pool.submit(get_progress, future, progress)
 
 def stop_algo():
