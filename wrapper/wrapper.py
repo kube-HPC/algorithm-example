@@ -101,6 +101,7 @@ def on_start(*args):
 def on_stop(*args):
     stop_algo()
 
+print('starting algorithm-example')
 socketPort = os.getenv('WORKER_SOCKET_PORT', 3000)
 socketIO = SocketIO('127.0.0.1', socketPort)
 
