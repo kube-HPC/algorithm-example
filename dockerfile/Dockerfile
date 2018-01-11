@@ -9,4 +9,4 @@ COPY ./libStub/build/liblibStub.so /hkube/algoPackage/bin/
 
 WORKDIR /hkube/algoPackage/
 ENV DLL_PATH "/hkube/algoPackage/bin/liblibStub.so"
-CMD ["python3", "wrapper.py"]
+CMD ["python3","-u", "wrapper.py"]
