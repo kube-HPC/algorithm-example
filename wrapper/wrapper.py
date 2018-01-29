@@ -1,11 +1,12 @@
 from concurrent.futures import ThreadPoolExecutor
 from ctypes import *
 from time import sleep
-import json
 import os
-from socketIO_client import SocketIO
-from random import *
 
+import botocore
+from socketIO_client import SocketIO
+import boto3
+import csv
 
 def get_progress(future, progressFunc):
     while future.running():
@@ -69,27 +70,13 @@ def on_disconnect():
 def on_reconnect():
     print('reconnect')
 
-
-# def on_command(*args):
-#     message = args[0]
-#     command = message["command"]
-#     data = message["data"]
-#     print('command: ', command)
-#     print('data: ', data)
-#     if command == 'initialize':
-#         outMessage = {'command': 'initialized'}
-#         socketIO.emit('commandMessage', outMessage)
-#     elif command == 'start':
-#         run_algo()
-#         outMessage = {'command': 'started'}
-#         socketIO.emit('commandMessage', outMessage)
-#     elif command == 'stop':
-#         stop_algo()
-#         outMessage = {'command': 'stopped'}
-#         socketIO.emit('commandMessage', outMessage)
-
 def on_init(*args):
     message = args[0]
+    print('Got init with message',message)
+    data = message["data"]
+    input = data["input"][0]
+    downloadIfNeeded(input)
+
     outMessage = {'command': 'initialized'}
     socketIO.emit('initialized', outMessage)
 
@@ -101,7 +88,78 @@ def on_start(*args):
 def on_stop(*args):
     stop_algo()
 
+def downloadIfNeeded(input,fileKey="input_file_path"):
+    if input[fileKey].startswith('http'):
+        input[fileKey] = downloadFromS3(input[fileKey])
+    if input[fileKey].endswith('csv'):
+        d = []
+        with open(input[fileKey]) as csvFile:
+            csvReader = csv.DictReader(csvFile)
+            for line in csvReader:
+                d.append(line)
+        for line in d:
+            downloadIfNeeded(line,'SessionFilePath')
+        with open(input[fileKey], 'w') as f:  # Just use 'w' mode in 3.x
+            w = csv.DictWriter(f, d[0].keys())
+            w.writeheader()
+            for line in d:
+                w.writerow(line)
+
+def downloadFromS3(url):
+    try:
+        segments = url.rpartition('/')
+        filename = segments[2]
+        segments=segments[0].rpartition('/')
+        backetname = segments[2]
+        bucket=s3_client.Bucket(backetname)
+        localfilename = os.path.join(localStoragePath,filename)
+        bucket.download_file(filename, localfilename)
+        return localfilename
+    except botocore.exceptions.ClientError as e:
+        print("Error",e)
+    
+
+
 print('starting algorithm-example')
+
+key=os.getenv('AWS_ACCESS_KEY_ID',"")
+secret=os.getenv('AWS_SECRET_ACCESS_KEY',"")
+s3EndpointUrl=os.getenv('S3_ENDPOINT_URL',"")
+localStoragePath=os.getenv('LOCAL_STORAGE_PATH','./localStoragePath')
+if not os.path.exists(localStoragePath):
+    os.makedirs(localStoragePath)
+
+if s3EndpointUrl:
+
+    s3_client_session = boto3.session.Session(
+        aws_access_key_id=key,
+        aws_secret_access_key=secret,
+    )
+    s3_client = s3_client_session.resource(
+        service_name='s3',
+        endpoint_url=s3EndpointUrl
+        )
+    # url = 'http://10.32.10.24:9000/minio/apak/test1.csv'
+    #
+    # try:
+    #     # parsedUrl = urlparse(url);
+    #     segments = url.rpartition('/')
+    #     filename = segments[2]
+    #     segments=segments[0].rpartition('/')
+    #     backetname = segments[2]
+    #     bucket=s3_client.Bucket(backetname)
+    #     bucket.download_file(filename, filename)
+    # except botocore.exceptions.ClientError as e:
+    #     print("Error",e)
+    
+    # for bucket in s3_client.buckets.all():
+    #     print(bucket.name)
+    # auth=S3Auth(key,secret,s3EndpointUrl)
+    # r = requests.get('http://10.32.10.24:9000/minio/apak/test1.csv', auth=auth)
+    print('s3 init')
+else:
+    print('s3 not init')
+
 socketPort = os.getenv('WORKER_SOCKET_PORT', 3000)
 socketIO = SocketIO('127.0.0.1', socketPort)
 
