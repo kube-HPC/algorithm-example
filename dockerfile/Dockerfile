@@ -1,8 +1,5 @@
-FROM python:3.6.3
-MAINTAINER yehiyam@gmail.com
-RUN apt-get update && apt-get install --yes nano python3-pip
-RUN pip3 install --upgrade pip
-RUN pip3 install aiohttp socketIO_client
+FROM hkube/python-algorithm-base:v1.0.0
+LABEL maintainer="yehiyam@gmail.com"
 RUN mkdir /hkube
 COPY ./wrapper /hkube/algoPackage
 COPY ./libStub/build/liblibStub.so /hkube/algoPackage/bin/
