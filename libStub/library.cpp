@@ -17,6 +17,7 @@ int doAlgo( int seconds)
     for (int i = 0 ; i< seconds ; i++)
     {
         if (shouldStopFlag){
+            std::cout<<"shouldStopFlag" << std::endl;
             shouldStopFlag = false;
             progressPercent = 100;
             return -1;
@@ -35,6 +36,7 @@ double progress()
 }
 
 bool stop(){
+    std::cout<<"c++ got stop" << std::endl;
     shouldStopFlag = true;
     progressPercent=0;
     return shouldStopFlag;

@@ -54,9 +54,14 @@ def stop_algo():
         dllPath = os.path.join(basePath, dllPath)
     print('dllPath: ', dllPath)
     algodll = cdll.LoadLibrary(dllPath)
+    print('1')    
     stop = algodll.stop
+    print('2')    
     stop.restype = c_bool
+    print('3')    
     stop()
+    print('4')    
+    
 
 def on_connect():
     print('connect')
