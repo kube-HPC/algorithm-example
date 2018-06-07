@@ -86,6 +86,13 @@ def on_start(*args):
 def on_stop(*args):
     stop_algo()
 
+def on_exit(*args):
+    message = args[0]
+    code=0
+    if (message):
+        code=message[exitCode]
+    sys.exit(code)
+
 print('starting algorithm-example')
 socketPort = os.getenv('WORKER_SOCKET_PORT', 3000)
 socketIO = SocketIO('127.0.0.1', socketPort)
@@ -99,5 +106,6 @@ socketIO.on('reconnect', on_reconnect)
 socketIO.on('initialize', on_init)
 socketIO.on('start', on_start)
 socketIO.on('stop', on_stop)
+socketIO.on('exit',on_exit)
 socketIO.wait()
 
