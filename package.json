@@ -1,6 +1,6 @@
 {
   "name": "algorithm-example",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "dependencies": {},
   "scripts": {
     "build": "./dockerfile/build.sh algorithm-example",
