@@ -90,7 +90,7 @@ def on_exit(*args):
     message = args[0]
     code=0
     if (message):
-        code=message[exitCode]
+        code=message['exitCode']
     sys.exit(code)
 
 print('starting algorithm-example')
