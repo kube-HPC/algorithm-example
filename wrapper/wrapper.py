@@ -3,6 +3,7 @@ from ctypes import *
 from time import sleep
 import json
 import os
+import sys
 from socketIO_client import SocketIO
 from random import *
 
@@ -87,10 +88,10 @@ def on_stop(*args):
     stop_algo()
 
 def on_exit(*args):
-    message = args[0]
     code=0
-    if (message):
-        code=message['exitCode']
+    if (args and args[0]):
+        code=args[0]['exitCode']
+    print('Got exit command. Exiting with code',code)
     sys.exit(code)
 
 print('starting algorithm-example')
