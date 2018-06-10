@@ -89,8 +89,9 @@ def on_stop(*args):
 
 def on_exit(*args):
     code=0
+    print ("args:",args[0])
     if (args and args[0]):
-        code=args[0]['exitCode']
+        code=args[0].get('exitCode',0)
     print('Got exit command. Exiting with code',code)
     sys.exit(code)
 
