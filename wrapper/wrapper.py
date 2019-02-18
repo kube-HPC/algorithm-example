@@ -7,13 +7,15 @@ import sys
 from socketIO_client import SocketIO
 from random import *
 
+_input = None
+
 
 def get_progress(future, progressFunc):
     while future.running():
         progress = progressFunc()
         print(progress)
         outMessage = {'command': 'progress', 'data': {'progress': progress}}
-        print('sending message: ',outMessage)
+        print('sending message: ', outMessage)
         socketIO.emit('progress', outMessage)
         sleep(1)
 
@@ -23,8 +25,14 @@ def get_progress(future, progressFunc):
         socketIO.emit('stopped', outMessage)
     else:
         res = future.result()
-        out_message = {'command': 'done', 'data': {'output': res}}
-        socketIO.emit('done', out_message)
+        data = _input[0]
+        if data == 'throw':
+            out_message = {'command': 'errorMessage',
+                           'error': {'message': 'throwing exception'}}
+            socketIO.emit('errorMessage', out_message)
+        else:
+            out_message = {'command': 'done', 'data': {'output': res}}
+            socketIO.emit('done', out_message)
 
 
 def run_algo():
@@ -33,8 +41,8 @@ def run_algo():
     dllPath = os.getenv('DLL_PATH', '../libStub/build/liblibStub.so')
     print('dllPath: ', dllPath)
     if not os.path.isabs(dllPath):
-        dllPath = os.path.join(basePath,dllPath)
-    print('dllPath: ',dllPath)
+        dllPath = os.path.join(basePath, dllPath)
+    print('dllPath: ', dllPath)
     algodll = cdll.LoadLibrary(dllPath)
     progress = algodll.progress
     progress.restype = c_double
@@ -45,24 +53,25 @@ def run_algo():
     future = pool.submit(doAlgo, 1)
     progress_future = pool.submit(get_progress, future, progress)
 
+
 def stop_algo():
     print('got stop command')
     # connect to c++ library
-    basePath = os.path.dirname(os.path.realpath(__file__));
+    basePath = os.path.dirname(os.path.realpath(__file__))
     dllPath = os.getenv('DLL_PATH', '../libStub/build/liblibStub.so')
     print('dllPath: ', dllPath)
     if not os.path.isabs(dllPath):
         dllPath = os.path.join(basePath, dllPath)
     print('dllPath: ', dllPath)
     algodll = cdll.LoadLibrary(dllPath)
-    print('1')    
+    print('1')
     stop = algodll.stop
-    print('2')    
+    print('2')
     stop.restype = c_bool
-    print('3')    
+    print('3')
     stop()
-    print('4')    
-    
+    print('4')
+
 
 def on_connect():
     print('connect')
@@ -71,29 +80,36 @@ def on_connect():
 def on_disconnect():
     print('disconnect')
 
+
 def on_reconnect():
     print('reconnect')
 
+
 def on_init(*args):
-    message = args[0]
+    global _input
+    _input = args[0]["data"]["input"]
     outMessage = {'command': 'initialized'}
     socketIO.emit('initialized', outMessage)
+
 
 def on_start(*args):
     run_algo()
     outMessage = {'command': 'started'}
     socketIO.emit('started', outMessage)
 
+
 def on_stop(*args):
     stop_algo()
 
+
 def on_exit(*args):
-    code=0
-    print ("args:",args[0])
+    code = 0
+    print("args:", args[0])
     if (args and args[0]):
-        code=args[0].get('exitCode',0)
-    print('Got exit command. Exiting with code',code)
+        code = args[0].get('exitCode', 0)
+    print('Got exit command. Exiting with code', code)
     sys.exit(code)
+
 
 print('starting algorithm-example')
 socketPort = os.getenv('WORKER_SOCKET_PORT', 3000)
@@ -108,6 +124,5 @@ socketIO.on('reconnect', on_reconnect)
 socketIO.on('initialize', on_init)
 socketIO.on('start', on_start)
 socketIO.on('stop', on_stop)
-socketIO.on('exit',on_exit)
+socketIO.on('exit', on_exit)
 socketIO.wait()
-
