@@ -74,8 +74,8 @@ def stop_algo():
 
 
 def on_connect():
-    print('connect')
-
+    outMessage = {'log':'connected','command': 'connected'}
+    print(json.dumps(outMessage))
 
 def on_disconnect():
     print('disconnect')
